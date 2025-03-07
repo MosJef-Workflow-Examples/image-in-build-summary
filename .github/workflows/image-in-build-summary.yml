@@ -1,0 +1,21 @@
+name: Image Workflow Status
+
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          # Generate a random image to use. You can use any image you like. 
+          mx=320;my=256;head -c "$((3*mx*my))" /dev/urandom | convert -depth 8 -size "${mx}x${my}" RGB:- generated.png
+
+          # Commit and push image to repo using built in actions user
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "generated"
+          git push
+
+      - name: Use image in summary
+        run: echo '![Generated Image](${{ github.server_url }}/${{ github.repository }}/raw/main/generated.png)' >> $GITHUB_STEP_SUMMARY
